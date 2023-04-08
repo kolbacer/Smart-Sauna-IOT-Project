@@ -58,7 +58,7 @@ app.get('/monitoring', (req, res) => {
         const intervalId = setInterval(()=>{
             console.log('Get current config ' + subscriptions.monitoringValue)
             res.write(`data: ${subscriptions.monitoringValue}\n\n`)
-        },5000)
+        },1000)
 
         res.on('close', () => {
             console.log('Client closed connection')
