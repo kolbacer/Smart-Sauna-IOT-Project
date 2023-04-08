@@ -8,9 +8,9 @@
 #define BLUE_LED_PIN 16
 #define YELLOW_LED_PIN 5
 
-const char* ssid = "****";
-const char* password = "****";
-const char* mqtt_server = "test.mosquitto.org";
+const char* ssid = "DIR-632";
+const char* password = "76543210";
+const char* mqtt_server = "192.168.0.27";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -23,11 +23,11 @@ DHT dht(DHT11_PIN, DHT11);
 struct Settings {
   float targetTmp; // target temperature
   float delta;     // thermostat hysteresis
-  
+
   float getMin() {
     return targetTmp - delta/2;
   }
-  
+
   float getMax() {
     return targetTmp + delta/2;
   }
@@ -102,7 +102,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
     snprintf (msg, MSG_BUFFER_SIZE, "[{\"heater\": \"sauna\", \"targetTmp\": %f, \"delta\": %f},"
                                     "{\"heater\": \"pool\", \"targetTmp\": %f, \"delta\": %f}]",
-                                    saunaSettings.targetTmp, saunaSettings.delta, 
+                                    saunaSettings.targetTmp, saunaSettings.delta,
                                     poolSettings.targetTmp, poolSettings.delta);
     Serial.print("Publish message: ");
     Serial.println(msg);
@@ -136,7 +136,7 @@ void reconnect() {
 void setup()
 {
   Serial.begin(115200);
-  
+
   pinMode(YELLOW_LED_PIN, OUTPUT);
   pinMode(BLUE_LED_PIN, OUTPUT);
 
@@ -146,7 +146,7 @@ void setup()
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
-  
+
   saunaSettings = {30, 1};
   poolSettings = {35, 2};
 }
@@ -165,7 +165,7 @@ void loop()
     float saunaTmp = dht.readTemperature();
     float saunaHum = dht.readHumidity();
     float poolTmp = getTmp(analogRead(TMP36_PIN));
-  
+
     // check sauna
     if (!isSaunaHeating && (saunaTmp < saunaSettings.getMin())) {
       // turn on thermostat
@@ -177,7 +177,7 @@ void loop()
       digitalWrite(YELLOW_LED_PIN, LOW);
       isSaunaHeating = false;
     }
-  
+
     // check pool
     if (!isPoolHeating && (poolTmp < poolSettings.getMin())) {
       // turn on thermostat
@@ -201,7 +201,7 @@ void loop()
 float getTmp(int reading) {
   // Convert the reading into voltage:
   float voltage = reading * (3300 / 1024.0);
-  
+
   // Convert the voltage into the temperature in Celsius:
   return (voltage - 500) / 10;
 }
