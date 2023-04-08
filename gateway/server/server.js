@@ -1,6 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const {broker} = require('../broker/broker')
+const {broker} = require('./broker')
 
 const app = express()
 const port = process.env.PORT

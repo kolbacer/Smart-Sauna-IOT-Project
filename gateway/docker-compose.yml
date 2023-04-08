@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    hostname: mosquitto
+    ports:
+      - "1883:1883"
+    expose:
+      - "1883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+    networks:
+      - mosquitto
+
+  server:
+    build:
+      context: ./server
+    restart: always
+    depends_on:
+      - mosquitto
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
+    environment:
+      - MQTT_SERVER=mqtt://mosquitto:1883
+      - PORT=3000
+    networks:
+      - mosquitto
+
+networks:
+  mosquitto:
+    name: mosquitto
+    driver: bridge
