@@ -36,6 +36,7 @@ broker.on('message', function(topic,message){
     }
 })
 
+//API
 app.get('/getconfig', async (req, res) => {
     try {
         broker.publish('server/getconfigcommand',"get")
