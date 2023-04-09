@@ -7,75 +7,106 @@ const port = process.env.PORT
 
 const jsonParser = bodyParser.json()
 
-const subscriptions = {
-    monitoringValue: null,
-    currentConfig:null
-}
-
 //Subscriptions
 broker.on('connect', function () {
+    console.log('MQTT connected')
 
-    console.log('connected')
     broker.subscribe(['device/monitoring','device/getconfigreply'], function (err) {
         if (err) {
-            console.log('Error  ' + err)
-        }else if(!err){
-            console.log('Fine  ' + err)
+            console.log('Topics subscription error: ' + err)
+        } else {
+            console.log('Topics subscription success')
         }
     })
 })
 
+//Callbacks
+let monitoringCallbackProps = {
+    ignore: true,
+    res: null
+}
+let monitoringCallback = (msg) => {
+    let props = monitoringCallbackProps
+    if (props.ignore) return
+
+    try {
+        props.res.write(`data: ${msg.toString()}\n\n`)
+    } catch (err) {
+        console.log(err)
+        props.res.status(500).send('ERROR: ' + err)
+    }
+}
+
+let getconfigreplyCallbackProps = {
+    ignore: true,
+    res: null,
+    replyReceived: null
+}
+let getconfigreplyCallback = (msg) => {
+    let props = getconfigreplyCallbackProps
+    if (props.ignore) return
+
+    try {
+        props.res.send(msg)
+    } catch (err){
+        console.log(err)
+        props.res.status(500).send('ERROR: ' + err)
+    }
+
+    props.replyReceived()
+}
+
 broker.on('message', function(topic,message){
     if(topic === "device/monitoring"){
-        subscriptions.monitoringValue = message.toString()
-        // console.log('Monitoring  ' + message.toString())
+        console.log('Received message from device/monitoring')
+        monitoringCallback(message)
     }
     if(topic === 'device/getconfigreply'){
-        subscriptions.currentConfig = message
-        // console.log('Current config  ' + message)
+        console.log('Received message from device/getconfigreply')
+        getconfigreplyCallback(message)
     }
 })
 
 //API
 app.get('/getconfig', async (req, res) => {
-    try {
-        broker.publish('server/getconfigcommand',"get")
-        const wait = new Promise((resolve, reject) => {
-                setTimeout(() => {
-                resolve(res.send(subscriptions.currentConfig))},300)})
-        await wait
-    }catch (err){
-        console.log(err)
-        res.status(500).send('ERROR: ' + err)
-    }
+
+    getconfigreplyCallbackProps.res = res
+    const waitReply = new Promise((resolve, reject) => {
+        getconfigreplyCallbackProps.replyReceived = resolve
+    })
+    getconfigreplyCallbackProps.ignore = false
+
+    broker.publish('server/getconfigcommand',"get")
+
+    await waitReply
+    getconfigreplyCallbackProps.ignore = true
+    getconfigreplyCallbackProps.res = null
+    getconfigreplyCallbackProps.replyReceived = null
 })
 
 app.get('/monitoring', (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Acces-Control-Allow-Origin','*');
 
-    try {
-        const intervalId = setInterval(()=>{
-            console.log('Get current config ' + subscriptions.monitoringValue)
-            res.write(`data: ${subscriptions.monitoringValue}\n\n`)
-        },1000)
+    monitoringCallbackProps.res = res
+    monitoringCallbackProps.ignore = false
 
-        res.on('close', () => {
-            console.log('Client closed connection')
-            clearInterval(intervalId)
-            res.end()
-        })
-    }catch (err){
-        console.log(err)
-        res.status(500).send('ERROR: ' + err)
-    }
+    res.on('close', () => {
+        console.log('Client closed connection')
+        monitoringCallbackProps.ignore = true
+        monitoringCallbackProps.res = null
+        res.end()
+    })
 })
 
 app.post('/setconfig', jsonParser, (req,res) => {
     try {
-        broker.publish('server/setconfig', JSON.stringify({heater: req.body.heater, targetTmp: req.body.targetTmp, delta: req.body.delta}))
+        broker.publish('server/setconfig', JSON.stringify({
+            heater: req.body.heater,
+            targetTmp: req.body.targetTmp,
+            delta: req.body.delta}))
         res.send('New config published')
-    }catch (err){
+    } catch (err){
         console.log(err)
         res.status(500).send('ERROR: ' + err)
     }
