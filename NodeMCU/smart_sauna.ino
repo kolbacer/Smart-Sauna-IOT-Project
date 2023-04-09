@@ -8,9 +8,10 @@
 #define BLUE_LED_PIN 16
 #define YELLOW_LED_PIN 5
 
-const char* ssid = "DIR-632";
-const char* password = "76543210";
-const char* mqtt_server = "192.168.0.27";
+// Configuration
+const char* ssid = "****";
+const char* password = "****";
+const char* mqtt_server = "****";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
