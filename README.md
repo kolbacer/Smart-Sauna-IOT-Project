@@ -41,4 +41,11 @@ If you want to use an external broker, pass its address to the server env variab
 * **POST** `/setconfig` - set new configuration
 * **GET** `/monitoring` - monitor indicators of temperature and humidity via SSE
 
-## Flutter APP
+## Flutter App
+In Smart Sauna users can:  
+<li> Connect to a server <br>
+<img src="https://user-images.githubusercontent.com/61321903/231017869-d7dcdee4-fa64-4ef9-9e59-80c8a6379353.png" width="207" height="448"><br><br>
+<li> Set configurations for the heaters <br>
+<img src="https://user-images.githubusercontent.com/61321903/231017886-433fba33-d645-4008-b8e6-4ee8e111c5ed.png" width="207" height="448">    <img src="https://user-images.githubusercontent.com/61321903/231018077-288eee33-a0f4-4e24-9a01-64e5702d3f38.png" width="207" height="448"><br><br>  
+<li> View statistics <br>
+<img src="https://user-images.githubusercontent.com/61321903/231018106-bedfbe9e-486d-4a1b-bddf-a4566bac61d7.png" width="207" height="448">    <img src="https://user-images.githubusercontent.com/61321903/231018112-28595a3e-c6e9-4af0-b645-8e6d21c16b96.png" width="207" height="448"><br><br>
