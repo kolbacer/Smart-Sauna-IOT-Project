@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iot_ui/pages/elements/circular_slider.dart';
 
+import '../constants/global.dart';
 import '../data/models/configuration.dart';
 import '../data/data_providers/configuration_api.dart';
 import '../data/models/extreme_values.dart';
@@ -30,30 +31,23 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
       if (saunaConfiguration.targetTmp != -1 &&
           saunaConfiguration.delta != -1 &&
           poolConfiguration.targetTmp != -1 &&
-          poolConfiguration.delta != -1) {
-        api.setConfiguration(saunaConfiguration.toJson()).then((response) {
-          api.setConfiguration(poolConfiguration.toJson()).then(
+          poolConfiguration.delta != -1 &&
+          saunaConfiguration.heater != "error") {
+        api
+            .setConfiguration(saunaConfiguration.toJson(), ip, port)
+            .then((response) {
+          api.setConfiguration(poolConfiguration.toJson(), ip, port).then(
             (response) {
-              showAlertDialog(context, response);
+              CustomAlertDialog.show(response, context: context);
             },
           ).catchError((e) {
-            showAlertDialog(context, e);
+            CustomAlertDialog.show(e, context: context);
           });
         }).catchError((e) {
-          showAlertDialog(context, e);
+          CustomAlertDialog.show(e, context: context);
         });
       }
     });
-  }
-
-  Future<void> showAlertDialog(BuildContext context, String response) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return CustomAlertDialog(response: response);
-      },
-    );
   }
 
   @override
@@ -65,8 +59,8 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
         Configuration(heater: "sauna", targetTmp: -1, delta: -1);
     poolConfiguration = Configuration(heater: "pool", targetTmp: -1, delta: -1);
     api = ConfigurationAPI();
-    futureSaunaConfiguration = api.getConfiguration(0);
-    futurePoolConfiguration = api.getConfiguration(1);
+    futureSaunaConfiguration = api.getConfiguration(0, ip, port, context);
+    futurePoolConfiguration = api.getConfiguration(1, ip, port, context);
   }
 
   @override
@@ -142,12 +136,12 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
       children: [
         Text(
           config.heater == 'sauna' ? 'Sauna' : 'Pool',
-          style: titleTextStyle,
+          style: TextStyles.titleTextStyle,
         ),
         const SizedBox(height: 28.0),
         const Text(
           'Temperature',
-          style: title2TextStyle,
+          style: TextStyles.title2TextStyle,
         ),
         const SizedBox(height: 16.0),
         CircularSlider(
@@ -158,7 +152,7 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
         const SizedBox(height: 8.0),
         const Text(
           'Δ (Accuracy)',
-          style: title2TextStyle,
+          style: TextStyles.title2TextStyle,
         ),
         buildSliderColumn(screenWidth, config, limits),
       ],
@@ -190,7 +184,7 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
         ),
         Text(
           '${config.delta.toStringAsFixed(0)}°C',
-          style: commonTextStyle,
+          style: TextStyles.commonTextStyle,
         ),
         const SizedBox(height: 16.0),
       ],

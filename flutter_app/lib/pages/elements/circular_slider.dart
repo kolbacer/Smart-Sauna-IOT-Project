@@ -74,7 +74,7 @@ class _CircularSliderState extends State<CircularSlider> {
     return Center(
         child: Text(
       '${value.toStringAsFixed(0)}°C',
-      style: commonTextStyle,
+      style: TextStyles.commonTextStyle,
     ));
   }
 }

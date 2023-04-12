@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iot_ui/pages/elements/modal_dialog.dart';
 import '../pages/configuration_page.dart';
 import '../pages/statistics_page.dart';
 
@@ -35,6 +36,16 @@ class _MainPageState extends State<MainPage> {
   late List<Widget> _pages;
   late PageController _pageController;
 
+  Future<void> showConfigurationDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const ModalDialog();
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -46,6 +57,9 @@ class _MainPageState extends State<MainPage> {
     ];
 
     _pageController = PageController(initialPage: _selectedPageIndex);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showConfigurationDialog();
+    });
   }
 
   @override
@@ -59,6 +73,15 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_appBarTitle[_selectedPageIndex]),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Configure network',
+            onPressed: () {
+              showConfigurationDialog();
+            },
+          ),
+        ],
       ),
       body: _buildPageView(),
       bottomNavigationBar: _buildBottomNavBar(),

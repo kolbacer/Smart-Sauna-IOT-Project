@@ -8,6 +8,19 @@ class CustomAlertDialog extends StatelessWidget {
     required this.response,
   }) : super(key: key);
 
+  static void show(
+    String text, {
+    required BuildContext context,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return CustomAlertDialog(response: text);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(

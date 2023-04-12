@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'dart:convert';
 
+import '../../constants/global.dart';
 import '../../data/data_providers/monitoring_api.dart';
 import '../../data/models/chart_data.dart';
 
@@ -62,7 +63,7 @@ class _ChartState extends State<Chart> {
 
   void connectSse() {
     var myStream = Sse.connect(
-      uri: Uri.parse('http://localhost:3000/monitoring'),
+      uri: Uri.parse('http://$ip:$port/monitoring'),
       closeOnError: true,
       withCredentials: false,
     ).stream;
